@@ -194,7 +194,7 @@ class XmlStreamer(object):
 
 def test_xml_streamer():
     def outcb(text):
-        if text == None:
+        if text is None:
             sys.stdout.write('\n\n\nAll done!\n')
         else:
             sys.stdout.write(text)
