@@ -206,7 +206,7 @@ class LyX2XML(object):
         if self.debug_level >= 3:
             self.dbg(3, 'Fixed lines:\n')
             for i in range(len(self.lines)):
-                self.dbg(3, '%d %s' % (i + 1, self.lines[i]))
+                self.dbg(3, '{0:d} {1!s}'.format(i + 1, self.lines[i]))
         self._lyx2xml()
         self.xout.finish()
         return None
@@ -229,12 +229,12 @@ class LyX2XML(object):
             # We're just opening a tag that's not already in the stack.
             # Not much to do in this case.
             assert new_style != mixed_tags[tag]
-            self.dbg(2, 'adding (\\%s, %s) to the stack (%s) at %d' % (tag, new_style, repr(stack), i))
+            self.dbg(2, 'adding (\\{0!s}, {1!s}) to the stack ({2!s}) at {3:d}'.format(tag, new_style, repr(stack), i))
             stack.append((tag, new_style))
             return i + 1
         # OK, we have work to do: close all intervening tags, close this
         # one, re-open all those tags and this one.
-        self.dbg(2, 'fixing ordering for \\%s at line %d, stack = %s' % (tag, i, repr(stack)))
+        self.dbg(2, 'fixing ordering for \\{0!s} at line {1:d}, stack = {2!s}'.format(tag, i, repr(stack)))
         m = -1
         for k in range(len(stack) - 1, -1, -1):
             # Close tags
@@ -244,7 +244,7 @@ class LyX2XML(object):
             # style:
             if stack[k][0] != tag or new_style != mixed_tags[tag]:
                 # Close the tag stack[k][0]
-                self.dbg(2, 'fixing ordering for \\%s by closing %s %s to re-open it' % (tag, stack[k][0], stack[k][1]))
+                self.dbg(2, 'fixing ordering for \\{0!s} by closing {1!s} {2!s} to re-open it'.format(tag, stack[k][0], stack[k][1]))
                 lines.insert(i, '\\' + stack[k][0] + ' ' + mixed_tags[stack[k][0]])
                 i += 1 # keep i pointing at the line triggering all this
                 if stack[k][0] == tag:
@@ -267,7 +267,7 @@ class LyX2XML(object):
             lines.insert(i, '\\' + stack[k][0] + ' ' + stack[k][1])
             k += 1
             i += 1
-        self.dbg(5, 'foo at %d: %s' % (i, lines[i]))
+        self.dbg(5, 'foo at {0:d}: {1!s}'.format(i, lines[i]))
         return i
 
 
@@ -286,11 +286,11 @@ class LyX2XML(object):
         i = 0
         while i < len(lines):
             line = lines[i]
-            self.dbg(4, 'looking at line %d: %s' % (i, line))
+            self.dbg(4, 'looking at line {0:d}: {1!s}'.format(i, line))
             # XXX We really should simplify all this startswith()
             # nonsense.
             if line.startswith('\\end_'):
-                self.dbg(2, 'fixing unended style tags %s' % (repr(stack)))
+                self.dbg(2, 'fixing unended style tags {0!s}'.format((repr(stack))))
                 for k in range(len(stack) - 1, -1, -1):
                     lines.insert(i, '\\' + stack[k][0] + ' ' + mixed_tags[stack[k][0]])
                     i += 1
@@ -298,14 +298,14 @@ class LyX2XML(object):
                 i += 1
                 continue
             if not line.startswith('\\') or line.find(' ') == -1:
-                self.dbg(5, '1 i++ at %d' % (i,))
+                self.dbg(5, '1 i++ at {0:d}'.format(i))
                 i += 1
                 continue
             # XXX And this parsing nonsense needs refactoring too
             line = _chomp(line[1:])
             a = line[0:line.find(' ')]
             if not a in mixed_tags:
-                self.dbg(5, '2 i++ at %d' % (i,))
+                self.dbg(5, '2 i++ at {0:d}'.format(i))
                 i += 1
                 continue
             v = line[line.find(' ') + 1:]
@@ -323,16 +323,16 @@ class LyX2XML(object):
             # latter is more sensible, so that's what we do.
             # Invariant: we never have more than one style tag in the
             # stack (XXX assert this in code).
-            self.dbg(4, 'seen \\%s at line %d' % (line, i))
+            self.dbg(4, 'seen \\{0!s} at line {1:d}'.format(line, i))
             i = self._close_and_reopen_styling(i, a, v)
-            self.dbg(5, '3 i++ at %d' % (i,))
+            self.dbg(5, '3 i++ at {0:d}'.format(i))
 
     def _lyxml2xml(self, start, end):
         lines = self.lines
         xout = self.xout
         i = start
         while i < end:
-            self.dbg(3, 'Parsing line %d: %s' % (i, lines[i]))
+            self.dbg(3, 'Parsing line {0:d}: {1!s}'.format(i, lines[i]))
             if lines[i].startswith('</'):
                 xout.end_elt(lines[i][2:-2])
                 i += 1
@@ -342,7 +342,7 @@ class LyX2XML(object):
                 # but let's handle them just in case.
                 if lines[i][-2] != '/':
                     e = find_end_of(lines, i, start_tok, end_tok)
-                    self.dbg(3, 'find_end_of(%d, %s, %s) = %d' % (i, start_tok, end_tok, e))
+                    self.dbg(3, 'find_end_of({0:d}, {1!s}, {2!s}) = {3:d}'.format(i, start_tok, end_tok, e))
                     # lyxtabular's <column> and <features> don't get closed!
                     # What a mess.
                     if e == -1:
@@ -355,11 +355,11 @@ class LyX2XML(object):
                     xout.attr(a[0], a[1])
                 if e:
                     i = self._lyxml2xml(i + 1, e)
-                    self.dbg(3, '_lyx2xml(...) = %d, looking for %d' % (i, e))
+                    self.dbg(3, '_lyx2xml(...) = {0:d}, looking for {1:d}'.format(i, e))
                     if i + 1 == e:
                         i += 1
                     else:
-                        self.dbg(3, '_lyx2xml() returned %d, e = %d' % (i, e))
+                        self.dbg(3, '_lyx2xml() returned {0:d}, e = {1:d}'.format(i, e))
                 else:
                     xout.end_elt(tag)
                     i += 1
@@ -385,7 +385,7 @@ class LyX2XML(object):
                         # Set the default language; needed for the style
                         # tag fix code.
                         mixed_tags['lang'] = v
-                        self.dbg(2, 'Default language is %s' % (v,))
+                        self.dbg(2, 'Default language is {0!s}'.format(v))
             i += 1
 
     def _lyx2xml(self, start=0, end=-1, cmd_type=None):
@@ -396,7 +396,7 @@ class LyX2XML(object):
             end = len(lines)
         prev_i = -1
         while i < end:
-            self.dbg(3, 'Parsing line %d: %s' % (i, lines[i]))
+            self.dbg(3, 'Parsing line {0:d}: {1!s}'.format(i, lines[i]))
             assert i > prev_i
             prev_i = i
             if len(lines[i]) == 0 or lines[i] == ' ':
@@ -435,10 +435,10 @@ class LyX2XML(object):
                     status = _chomp(lines[i][lines[i].find(' ') + 1:])
                 else:
                     status = None
-                self.dbg(4, 'lines[%d] = %s' % (i, lines[i]))
+                self.dbg(4, 'lines[{0:d}] = {1!s}'.format(i, lines[i]))
                 e = find_end_of(lines, i, start_tok, end_tok)
                 assert e != -1
-                self.dbg(4, 'find_end_of(%d, %s, %s) = %d' % (i, start_tok, end_tok, e))
+                self.dbg(4, 'find_end_of({0:d}, {1!s}, {2!s}) = {3:d}'.format(i, start_tok, end_tok, e))
                 # XXX Here we need to find any attributes that might be
                 # interspersed with child nodes so we can suck them in
                 # first.  What a PITA.
@@ -448,11 +448,11 @@ class LyX2XML(object):
                 if len(rest) == 2 and el != 'inset:Formula':
                     xout.attr(rest[0], escape(rest[1]))
                 i = self._lyx2xml(i + 1, e, cmd_type)
-                self.dbg(4, '_lyx2xml(...) = %d, looking for %s at %d; end = %d' % (i, end_tok, e, end))
+                self.dbg(4, '_lyx2xml(...) = {0:d}, looking for {1!s} at {2:d}; end = {3:d}'.format(i, end_tok, e, end))
                 if i + 1 == e:
                     i += 1
                 else:
-                    self.dbg(4, '_lyx2xml() returned %d, e = %d; end = %d' % (i, e, end))
+                    self.dbg(4, '_lyx2xml() returned {0:d}, e = {1:d}; end = {2:d}'.format(i, e, end))
                 assert lines[i].startswith('\\end_')
                 if len(rest) == 2 and el == 'inset:Formula':
                     xout.text(' ')
@@ -462,7 +462,7 @@ class LyX2XML(object):
                 i += 1
             elif cmd_type == 'inset':
                 # Parse "\begin_inset CommandInset ..." attributes
-                self.dbg(4, 'lines[%d] = %s' % (i, lines[i]))
+                self.dbg(4, 'lines[{0:d}] = {1!s}'.format(i, lines[i]))
                 while i < end and lines[i] != '' and lines[i] != ' ':
                     (a, v) = _parse_attr(lines[i])
                     if not a or not v:

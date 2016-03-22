@@ -40,10 +40,10 @@ class XmlStreamer(object):
         self.outcb('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.in_doctype = False
         if doctype:
-            self.outcb('<!DOCTYPE %s ' % (doctype,))
+            self.outcb('<!DOCTYPE {0!s} '.format(doctype))
             self.in_doctype = True
         if dtd:
-            self.outcb('SYSTEM "%s" ' % (dtd,))
+            self.outcb('SYSTEM "{0!s}" '.format(dtd))
         self.outcb('[\n')
 
     def _close_doctype(self):
@@ -64,21 +64,21 @@ class XmlStreamer(object):
         Add a PUBLIC entity.
         '''
         assert self.in_doctype
-        self.outcb('<!ENTITY %s PUBLIC "" "%s">\n' % (entity, val))
+        self.outcb('<!ENTITY {0!s} PUBLIC "" "{1!s}">\n'.format(entity, val))
 
     def system_entity(self, entity, val):
         '''
         Add a SYSTEM entity.
         '''
         assert self.in_doctype
-        self.outcb('<!ENTITY %s SYSTEM "%s">\n' % (entity, val))
+        self.outcb('<!ENTITY {0!s} SYSTEM "{1!s}">\n'.format(entity, val))
 
     def entity(self, entity, val):
         '''
         Add an internal entity.
         '''
         assert self.in_doctype
-        self.outcb('<!ENTITY %s "%s">\n' % (entity, val))
+        self.outcb('<!ENTITY {0!s} "{1!s}">\n'.format(entity, val))
 
     def finish(self):
         '''
@@ -137,7 +137,7 @@ class XmlStreamer(object):
         self._close_doctype()
         assert self.depth > 0
         if el and self.stack[-1] != el:
-            sys.stderr.write('\n\nWTF: el == %s, expecting %s at depth %d\n' % (el, self.stack[-1], self.depth))
+            sys.stderr.write('\n\nWTF: el == {0!s}, expecting {1!s} at depth {2:d}\n'.format(el, self.stack[-1], self.depth))
             sys.stderr.write(repr(self.stack))
         assert not el or self.stack[-1] == el
         if not self.in_tag:
